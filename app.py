@@ -3,15 +3,15 @@ from analyzers.Syntatic import Syntatic
 
 def main():
     lexical  = Lexical()
-    syntatic = Syntatic()
-    with open('entrada.txt', 'r') as f:
+    with open('./archives/entrada_2.txt', 'r') as f:
         file = f.readlines()
 
     tokensList = lexical.analyser(file)
-    tokensList = syntatic.analyser(tokensList)
+    syntatic = Syntatic(tokensList)
+    result = syntatic.analyser()
 
     # Print list
-    for token in tokensList: print(token)
+    #for token in tokensList: print(token)
 
 if __name__=="__main__":
     main()
