@@ -81,7 +81,6 @@ class Syntatic(object):
 
     def DEC(self, dec):
         myVar = Variable()
-        return False
         if (self.Type(myVar)):
             self.nextToken()
             if (self.currentToken == "TK_ID"):
@@ -97,6 +96,19 @@ class Syntatic(object):
                 print("Erro: esperava token 'id' na linha %d coluna %d.", self.currentLine(),self.currentColumn())
                 return False           
         else: return False
+        
+        #Parei aqui Continuar RDEC Começar a pensar em UI 
+    def RDEC(self, dec, var):
+        if self.currentToken == "TK_COMMA":
+            self.nextToken()
+            if(self.DV(var.type)):
+                return True
+            else:
+                return False
+        elif self.currentToken == "TK_LEFTPAR":
+        elif self.currentToken == "TK_SEMICOLON":
+        elif self.currentToken == "TK_EQUAL":
+        else:
         
 
     def Type(self, var):
