@@ -1,5 +1,5 @@
 from analyzers.Lexical import Lexical
-from analyzers.Syntatic import Syntatic
+#from analyzers.Syntatic import Syntatic
 
 def main():
     lexical  = Lexical()
@@ -7,11 +7,13 @@ def main():
         file = f.readlines()
 
     tokensList = lexical.analyser(file)
-    syntatic = Syntatic(tokensList)
-    result = syntatic.analyser()
+    #syntatic = Syntatic(tokensList)
+    #result = syntatic.analyser()
 
+    with open('./archives/saida_2.txt', 'w') as f:
     # Print list
-    #for token in tokensList: print(token)
+        for token in tokensList: f.write(str(token)+'\n')
+        f.close()
 
 if __name__=="__main__":
     main()

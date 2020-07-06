@@ -50,7 +50,7 @@ class Syntatic(object):
     def currentColumn(self):
         return self.tokenList[self.index].col
     
-    def currentLexema(self): 
+    def currentLexeme(self): 
         return self.tokenList[self.index].lexeme
     
     def analyser(self):
@@ -106,8 +106,50 @@ class Syntatic(object):
             else:
                 return False
         elif self.currentToken == "TK_LEFTPAR":
+            self.currentScope = var.lexeme
+            self.nextToken()
+            df = C3E()
+            if(self.DF(df)):
+                dec.code += df.code
+                return True
+            else:
+                return False
         elif self.currentToken == "TK_SEMICOLON":
+            self.nextToken()
+            return True
         elif self.currentToken == "TK_EQUAL":
+            self.nextToken()
+            constant = self.currentLexeme()
+            aux = self.createTemp()
+            if(var.type == 'int'):
+                if self.currentToken == "TK_CONST_INT":
+                    self.nextToken()
+                    if(self.currentToken == "TK_SEMICOLON"):
+                        dec.code += f"{aux} = {constant}\n {var.lexeme} = {aux}"
+                        self.nextToken()
+                        return True
+                    else:
+                        ##TODO CRIAR ALERTAS
+                        print(f'Erro: esperava o token "const_int" na linha {self.currentLine()} coluna ${self.currentColumn()}.')
+                        return False
+                else:
+                    #TODO CRIAR ALERTAS
+                    print(f'Erro: esperava o token ";" na linha {self.currentLine()} coluna ${self.currentColumn()}.')
+
+                    return False
+            if(var.type == 'float'):
+                if self.currentToken == "TK_CONST_REAL":
+                    self.nextToken()
+                    if(self.currentToken == "TK_SEMICOLON"):
+                        dec.code += f"{aux} = {constant}\n {var.lexeme} = {aux}"
+                        self.nextToken()
+                        return True
+                    else:
+                        ##TODO CRIAR ALERTAS
+                        return False
+                else:
+                    #TODO CRIAR ALERTAS
+                    return False
         else:
         
 
