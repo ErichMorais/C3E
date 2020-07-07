@@ -80,20 +80,20 @@ class Syntatic(object):
         else: return True
 
     def DEC(self, dec):
-        myVar = Variable()
-        if (self.Type(myVar)):
+        var = Variable()
+        if (self.Type(var)):
             self.nextToken()
             if (self.currentToken == "TK_ID"):
-                if (not self.AddToSymbolTable(myVar)):
-                    print("Variável %s já está em uso.", myVar.lexeme)
+                if (not self.AddToSymbolTable(var)):
+                    print(f"Variável {var.lexeme} já está em uso.", )
                     return False
                 self.nextToken()
-                if (self.RDEC(dec, myVar)):
+                if (self.RDEC(dec, var)):
                         return True
                 else:
                     return False
             else:
-                print("Erro: esperava token 'id' na linha %d coluna %d.", self.currentLine(),self.currentColumn())
+                print(f"Erro: esperava token 'id' na linha {self.currentLine()} coluna {self.currentColumn()}.")
                 return False           
         else: return False
         
@@ -130,11 +130,11 @@ class Syntatic(object):
                         return True
                     else:
                         ##TODO CRIAR ALERTAS
-                        print(f'Erro: esperava o token "const_int" na linha {self.currentLine()} coluna ${self.currentColumn()}.')
+                        print(f'Erro: esperava o token ";" na linha {self.currentLine()} coluna ${self.currentColumn()}.')
                         return False
                 else:
                     #TODO CRIAR ALERTAS
-                    print(f'Erro: esperava o token ";" na linha {self.currentLine()} coluna ${self.currentColumn()}.')
+                    print(f'Erro: esperava o token "const_int" na linha {self.currentLine()} coluna ${self.currentColumn()}.')
 
                     return False
             if(var.type == 'float'):
@@ -146,12 +146,237 @@ class Syntatic(object):
                         return True
                     else:
                         ##TODO CRIAR ALERTAS
+                        print(f'Erro: esperava o token ";" na linha {self.currentLine()} coluna ${self.currentColumn()}.')                        
                         return False
                 else:
                     #TODO CRIAR ALERTAS
+                    print(f'Erro: esperava o token "const_real" na linha {self.currentLine()} coluna ${self.currentColumn()}.')
+                    return False
+            else:
+                print(f'Erro: esperava o o tipo int ou float na linha {self.currentLine()} coluna ${self.currentColumn()}.')
+                return False
+        else:
+                print(f'Erro: esperava o  ;, ) ou , na linha {self.currentLine()} coluna ${self.currentColumn()}.')
+                return False
+
+    def DV(self, rcvtype):
+        var = Variable()
+        var.type = rcvtype
+        if (self.currentToken == 'TK_ID'):
+            if (not self.AddToSymbolTable(var)):
+                return False
+            self.nextToken()
+            if( self.RDV(rcvtype)):
+                return True
+            else:
+                return False
+        else:
+            print(f"Erro: esperava token 'id' na linha {self.currentLine()} coluna {self.currentColumn()}.")
+            return False
+
+    def RDV(self, rcvtype):
+        if (self.currentToken == "TK_COMMA"):
+            self.nextToken()
+            if (self.DV(rcvtype)):
+                return True
+            else:
+                return False
+        elif (self.currentToken == "TK_SEMICOLON"): 
+            self.nextToken()
+            return True
+        else:
+            print(f"Erro: esperava token , ou ; na linha {self.currentLine()} coluna {self.currentColumn()}.")
+            return False
+
+    def DF(self, df):
+        if(self.LP()):
+            if (self.currentToken == 'TK_RIGHTPAR'):
+                self.nextToken()
+                c3eBlock = C3E()
+                if (self.blockCode(c3eBlock)):
+                    df.code += c3eBlock.code
+                    return True
+                elif(self.currentToken == 'TK_SEMICOLON'):
+                    self.currentScope = 'Global'
+                    self.nextToken()
+                    return True
+                else:
+                    print(f"Erro: esperava token "+ '{' + f"ou ; na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                    return False
+            else:
+                    print(f"Erro: esperava token "+ ')' + f"ou ; na linha {self.currentLine()} coluna {self.currentColumn()}.")
                     return False
         else:
-        
+            return False
+
+    def LP(self):
+        var = Variable()
+        if (self.Type(var)):
+            self.nextToken()
+            if self.currentToken == 'TK_ID':
+                if (not self.AddToSymbolTable(var)):
+                    return False
+                self.nextToken()
+                if (self.RLP()):
+                    return True
+                else:
+                    return False
+            else:
+                print(f"Erro: esperava token 'id' na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                return False
+        else:
+            return True
+
+    def RLP(self):
+        if(self.currentToken == 'TK_COMMA'):
+            self.nextToken()
+            var = Variable()
+            if(self.Type(var)):
+                self.nextToken()
+                if(self.currentToken == 'TK_ID'):
+                    if (not self.AddToSymbolTable(var)):
+                        return False
+                    self.nextToken()
+                    if (self.RLP()):
+                        return True
+                    else:
+                        return False
+                else:
+                    print(f"Erro: esperava token 'id' na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                    return False
+            else:
+                return False
+        else:
+            return True
+    
+    def blockCode(self, c3eBlock):
+        if(self.currentToken == 'TK_LEFTBRAC'):
+            self.nextToken()
+            lcd = C3E()
+            if(self.LCD(lcd)):
+                c3eBlock.code += lcd.code
+                if(self.currentToken == 'TK_RIGHTBRAC'):
+                    self.currentScope = 'Global'
+                    self.nextToken()
+                    return True
+                else:
+                    print(f"Erro: esperava token "+ '}' + f"ou ; na linha {self.currentLine()} coluna {self.currentColumn()}.")
+        return False
+
+    def LCD(self, lcd):
+        var = Variable()
+        cmd = C3E()
+        if(self.COM(cmd)):
+            lcd.code += cmd.code
+            if (self.LCD(lcd)):
+                return True
+            else:
+                return False
+        elif (self.Type(var)):
+            self.nextToken()
+            if(self.DV(var.type)):
+                if(self.LCD(lcd)):
+                    return True
+                else: 
+                    return False
+            else:
+                return True
+        else:
+            return True
+
+    # TODO Implementar def de comandos da especificacao
+    def COM(self, cmd):
+        expression = C3E()
+        var = Variable()
+        #Que deus nos elimine 
+        if (self.currentToken == "TK_IF"):
+            self.nextToken()
+            return self.IFcommand(cmd)
+        elif(self.currentToken == "TK_WHILE"):
+            self.nextToken()
+            return self.WHILEcommand(cmd)
+        elif(self.currentToken == "TK_DO"):
+            self.nextToken()
+            return self.DOWHILEcommand(cmd)
+        elif(self.currentToken == "TK_FOR"):
+            self.nextToken()
+            return self.FORcommand(cmd)
+        elif(self.currentToken == "TK_BREAK"):
+            self.nextToken()
+            if(self.currentToken == "TK_SEMICOLON"):
+                self.nextToken()
+                cmd.code += f'goto {self.tempFim}\n'
+                self.COM(cmd)
+                return True
+            return False
+        elif(self.currentToken == "TK_CONTINUE"):
+            self.nextToken()
+            if(self.currentToken == "TK_SEMICOLON"):
+                self.nextToken()
+                cmd.code += f'goto {self.tempContinue}\n'
+                self.COM(cmd)
+                return True
+            return False
+        elif (self.Type(var)) :
+            self.nextToken()    
+            if(self.currentToken == 'TK_ID'):
+                if (not self.AddToSymbolTable(var)):
+                    return False
+                self.nextToken()  
+                rdec = C3E()  
+                if(self.RDEC(rdec, var)):
+                    cmd.code +=rdec.code
+                    return True
+                else:
+                    return False
+            else:
+                print(f"Erro: esperava token 'id' na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                return False
+        elif(self.E(expression)):
+            cmd.code += expression.code
+            if(self.currentToken == "TK_SEMICOLON" ):
+                self.nextToken()
+                return True
+            else:
+                return False
+        elif(self.currentToken == "TK_RETURN"):
+            self.nextToken()
+            if(self.currentToken == "TK_SEMICOLON"):
+                self.nextToken()
+                return True
+            else:
+                print(f"Erro: esperava token ; na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                return False
+        else:
+            return False
+
+    def IFcommand(self, rcvCode):
+        expression = c3eBlock = elseCmd =  C3E()
+        if(self.currentToken == "TK_LEFTPAR"):
+            self.nextToken()
+            if(self.E(expression)):
+                if(self.currentToken == "TK_RIGHTPAR"):
+                    self.nextToken()
+                    if(self.blockCode(c3eBlock)):
+                        endLabel = self.createLabel()
+                        sintElse = ""
+                        sintElse = self.ELSEcommand(sintElse, endLabel, elseCmd)
+                        rcvCode.code = expression.code + f'if {expression.place} = 0 goto {sintElse}\n' + c3eBlock.code +elseCmd+f'{endLabel}'
+                        return True
+        return False
+
+    def ELSEcommand(self,sintElse, endLabel, elseCmd):
+        c3eBlock = C3E()
+        if(self.currentToken == "TK_ELSE"):
+            self.nextToken()
+            if(self.blockCode(c3eBlock)):
+                elseLabel = self.createLabel()
+                elseCmd.code = f'goto {endLabel} \n{elseLabel}:\n' + c3eBlock.code
+                sintElse = elseLabel
+                return sintElse
+        sintElse = endLabel
+        return sintElse
+
 
     def Type(self, var):
         if self.currentToken == "TK_INT" :
