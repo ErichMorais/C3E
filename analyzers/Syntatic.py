@@ -52,6 +52,14 @@ class Syntatic(object):
     
     def currentLexeme(self): 
         return self.tokenList[self.index].lexeme
+
+    def   createTemp(self):
+        self.tempCont += 1
+        return f'T{self.tempCont}'
+    
+    def createLabel(self):
+        self.labelCont += 1
+        return f'L{self.labelCont}'
     
     def analyser(self):
         ld = C3E()
@@ -359,8 +367,7 @@ class Syntatic(object):
                     self.nextToken()
                     if(self.blockCode(c3eBlock)):
                         endLabel = self.createLabel()
-                        sintElse = ""
-                        sintElse = self.ELSEcommand(sintElse, endLabel, elseCmd)
+                        sintElse = self.ELSEcommand("", endLabel, elseCmd)
                         rcvCode.code = expression.code + f'if {expression.place} = 0 goto {sintElse}\n' + c3eBlock.code +elseCmd+f'{endLabel}'
                         return True
         return False
@@ -377,7 +384,137 @@ class Syntatic(object):
         sintElse = endLabel
         return sintElse
 
+    def WHILEcommand(self, rcvCode):
+        expression = c3eBlock = C3E()
+        if(self.currentToken == "TK_LEFTPAR"):
+            self.nextToken()
+            if(self.E(expression)):
+                if(self.currentToken == "TK_RIGHTPAR"):
+                    self.nextToken()
+                    self.tempContinue = iLabel = self.createLabel()
+                    self.tempFim = fLabel = self.createLabel()
+                    if(self.blockCode(c3eBlock)):
+                        rcvCode.code = f'{iLabel}+\n {expression.code} if {expression.place} = 0 goto {fLabel}\n {c3eBlock.code} goto {iLabel}\n {fLabel}:\n'
+                        return True
+        return False
 
+    def DOWHILEcommand(self,rcvCode):
+        expression = c3eBlock = C3E()
+        iLabel = self.createLabel()
+        fLabel = self.createLabel()
+        self.tempFim = fLabel
+        self.tempContinue = iLabel
+        if(self.blockCode(c3eBlock)):
+            if(self.currentToken == "TK_WHILE"):
+                self.nextToken()
+                if(self.currentToken == "TK_LEFTPAR"):
+                    self.nextToken()
+                    if(self.E(expression)):
+                        if(self.currentToken == "TK_RIGHTPAR"):
+                            self.nextToken()
+                            if(self.currentToken == "TK_SEMICOLON"):
+                                self.nextToken()
+                                rcvCode.code = f'{iLabel}+\n {c3eBlock + expression.code} if {expression.place} = 0 goto {iLabel}\n {fLabel}:\n'
+                                return True
+        return False
+
+    def FORcommand(self, rcvCode):
+        firstExp = secExp = trdExp = c3eBlock = C3E()
+        if(self.currentToken == "TK_LEFTPAR"):
+            self.nextToken()
+            if(self.E(firstExp)):
+                if(self.currentToken == "TK_SEMICOLON"):
+                    self.nextToken()
+                    if(self.E(secExp)):
+                        if(self.currentToken == "TK_SEMICOLON"):
+                            self.nextToken()
+                            if(self.E(trdExp)):
+                                if(self.currentToken == "TK_RIGHTPAR"):
+                                    self.nextToken()
+                                    iLabel = self.createLabel()
+                                    self.tempFim = fLabel = self.createLabel()
+                                    if(self.blockCode(c3eBlock)):
+                                        rcvCode.code = firstExp.code + f'{iLabel}:\n {secExp.code} if {secExp.place} = 0 goto {fLabel}\n {c3eBlock.code+self.tempContinue}: \n {trdExp.code} goto {iLabel}\n {fLabel}' 
+                                        return True
+        return False     
+
+    #E -> E' E1 
+    def E(self, E): 
+        varE1 = sintE = herdE = C3E()
+        if (self.E1(varE1)):
+            herdE.place = varE1.place
+            herdE.code = varE1.code
+            if (self.lineE(herdE, sintE)):
+                E.place = sintE.place
+                E.code = sintE.code
+                return True
+            else: 
+                return False
+        else: 
+            return False
+    
+    #E' -> ,E1 E' | e
+    def lineE(self, herdE, sintE):
+        varE1 = sintELinha = herdELinha = C3E()
+        if (self.currentToken == 'TK_COMMA'):
+            op = self.currentLexeme()
+            self.nextToken()
+            if (self.E1(varE1)):
+                herdELinha.place = self.createTemp()
+                herdELinha.code = (herdE.code + varE1.code + 
+                f'{herdELinha.place} = {herdE.place} {op} {varE1.place}\n')
+                if (self.lineE(herdELinha, sintELinha)):
+                    sintE.code = sintELinha.code
+                    sintE.place = sintELinha.place
+                    return True
+                else:
+                    return False
+        sintE.place = herdE.place
+        sintE.code = herdE.code
+        return True
+
+    def E1(self, varE1):
+        herdE1 = C3E()
+        varE3 = C3E()
+        if (self.E3(varE3)):
+            if (self.currentToken == 'TK_EQUAL' or self.currentToken == 'TK_STAREQUAL' or self.currentToken == 'TK_SLASHEQUAL'
+                or self.currentToken == 'TK_PERCENTEQUAL' or self.currentToken == 'TK_PLUSEQUAL' or self.currentToken == 'TK_MINEQUAL'):
+                op = self.currentLexeme()
+                self.nextToken()
+                if (self.E1(herdE1)):
+                    varE1.place = herdE1.place
+                    if (op == '='):
+                        varE1.code = f'{herdE1.code + varE3.code + varE3.place} = {varE1.place}\n'
+                    else:
+                        varE1.code = f'{herdE1.code + varE3.code + varE3.place} = {varE3.place} {op.substring(0, 1)}{ varE1.place}\n'
+                    return True
+                else:
+                    return False      
+            else:
+                varE1.place = varE3.place
+                varE1.code = varE3.code
+                return True
+        else:
+            return False
+
+    # def E2(self, sintExpression, herdExpression):
+    #     if (self.E3(sintExpression)):
+    #         if (self.lineE2(sintExpression, herdExpression)):
+    #             return True
+    #         else:
+    #             return False
+    #     else:
+    #         return False
+
+    # def lineE2(self, exp_s, exp_h):
+    #     if (self.E2(exp_s, exp_h)):
+    #         if (self.currentToken == 'TK_COLON'):
+    #             self.nextToken()    
+    #             if (self.E2(exp_s, exp_h)):
+    #                 if (self.E2Linha(exp_s, exp_h)):
+    #                     return True
+    #                 else return: False
+    #      else: return False
     def Type(self, var):
         if self.currentToken == "TK_INT" :
             var.type = "int" 
