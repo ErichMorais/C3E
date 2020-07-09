@@ -53,7 +53,7 @@ class Syntatic(object):
     def currentLexeme(self): 
         return self.tokenList[self.index].lexeme
 
-    def   createTemp(self):
+    def createTemp(self):
         self.tempCont += 1
         return f'T{self.tempCont}'
     
@@ -61,6 +61,18 @@ class Syntatic(object):
         self.labelCont += 1
         return f'L{self.labelCont}'
     
+    def AddToSymbolTable(self, rcvVar):
+        actVar = self.symbolTable.index(lambda item: item.lexeme == self.currentLexeme())
+        print(self.symbolTable)
+        if (actVar):
+            return False
+        else:
+            actVar.scope = self.currentScope
+            actVar.lexeme = self.currentLexeme()
+            self.symbolTable.append(actVar)
+            return True
+    
+
     def analyser(self):
         ld = C3E()
         if (self.LD(ld)):
@@ -72,6 +84,7 @@ class Syntatic(object):
     def LD(self, ld):
         dec = C3E()
         if (self.DEC(dec)):
+            print(dec)
             ld.code += dec.code
             rld = C3E()
             if (self.RLD(rld)):
@@ -83,6 +96,7 @@ class Syntatic(object):
     def RLD(self, rld):
         ld = C3E()
         if (self.LD(ld)):
+            print(ld)
             rld.code += ld.code
             return True
         else: return True
@@ -90,6 +104,7 @@ class Syntatic(object):
     def DEC(self, dec):
         var = Variable()
         if (self.Type(var)):
+            print(var)
             self.nextToken()
             if (self.currentToken == "TK_ID"):
                 if (not self.AddToSymbolTable(var)):
@@ -475,8 +490,8 @@ class Syntatic(object):
 
     def E1(self, varE1):
         herdE1 = C3E()
-        varE3 = C3E()
-        if (self.E3(varE3)):
+        varE2 = C3E()
+        if (self.E2(varE2)):
             if (self.currentToken == 'TK_EQUAL' or self.currentToken == 'TK_STAREQUAL' or self.currentToken == 'TK_SLASHEQUAL'
                 or self.currentToken == 'TK_PERCENTEQUAL' or self.currentToken == 'TK_PLUSEQUAL' or self.currentToken == 'TK_MINEQUAL'):
                 op = self.currentLexeme()
@@ -484,21 +499,21 @@ class Syntatic(object):
                 if (self.E1(herdE1)):
                     varE1.place = herdE1.place
                     if (op == '='):
-                        varE1.code = f'{herdE1.code + varE3.code + varE3.place} = {varE1.place}\n'
+                        varE1.code = f'{herdE1.code + varE2.code + varE2.place} = {varE1.place}\n'
                     else:
-                        varE1.code = f'{herdE1.code + varE3.code + varE3.place} = {varE3.place} {op.substring(0, 1)}{ varE1.place}\n'
+                        varE1.code = f'{herdE1.code + varE2.code + varE2.place} = {varE2.place} {op.substring(0, 1)}{ varE1.place}\n'
                     return True
                 else:
                     return False      
             else:
-                varE1.place = varE3.place
-                varE1.code = varE3.code
+                varE1.place = varE2.place
+                varE1.code = varE2.code
                 return True
         else:
             return False
 
     # def E2(self, sintExpression, herdExpression):
-    #     if (self.E3(sintExpression)):
+    #     if (self.E2(sintExpression)):
     #         if (self.lineE2(sintExpression, herdExpression)):
     #             return True
     #         else:
@@ -515,6 +530,75 @@ class Syntatic(object):
     #                     return True
     #                 else return: False
     #      else: return False
+
+    # E2 -> E3 E2'
+    def E2(self, varE2):
+        varE3 = sintE2 = herdE2 = C3E()
+        if (self.E3(varE2)):
+            herdE2.place = varE3.place
+            herdE2.code  = varE3.code
+            if (self.lineE2(herdE2, sintE2)):
+                varE2.place = sintE2.place
+                varE2.code = sintE2.code
+                return True
+            else:
+                return False
+        else:
+            return False
+
+
+    # E2' -> || E3 E2' | e
+    def lineE2(self, herdE2, sintE2):
+        varE3 = sintE2Linha = herdE2Linha = C3E()
+        if (self.currentToken == 'TK_OR'):
+            op = self.currentLexeme()
+            self.nextToken()
+            if (self.E3(varE3)):
+                herdE2Linha.place = self.createTemp()
+                herdE2Linha.code = f'{herdE2.code + varE3.code + herdE2Linha.place} = {herdE2.place + op + varE3.place}\n'
+                if (self.lineE2(herdE2Linha, sintE2Linha)):
+                    sintE2.place = sintE2Linha.place
+                    sintE2.code = sintE2Linha.code
+                    return True
+                else:
+                    return False
+        sintE2.place = herdE2.place
+        sintE2.code = herdE2.code
+        return True
+
+    def E3(self, varE3):
+        varE4 = sintE3 = herdE3 = C3E()
+        if (self.E4(varE3)):
+            herdE3.place = varE4.place
+            herdE3.code  = varE4.code
+            if (self.lineE2(herdE3, sintE3)):
+                varE3.place = sintE3.place
+                varE3.code = sintE3.code
+                return True
+            else:
+                return False
+        else:
+            return False
+    
+    def lineE3(self, herdE3, sintE3):
+        varE4 = sintE3Linha = herdE3Linha = C3E()
+        if (self.currentToken == 'TK_AND'):
+            op = self.currentLexeme()
+            self.nextToken()
+            if (self.E4(varE4)):
+                herdE3Linha.place = self.createTemp()
+                herdE3Linha.code = f'{herdE3.code + varE4.code + herdE3Linha.place} = {herdE3.place + op + varE4.place}\n'
+                if (self.lineE3(herdE3Linha, sintE3Linha)):
+                    sintE3.place = sintE3Linha.place
+                    sintE3.code = sintE3Linha.code
+                    return True
+                else:
+                    return False
+        sintE3.place = herdE3.place
+        sintE3.code = herdE3.code
+        return True
+
+
     def Type(self, var):
         if self.currentToken == "TK_INT" :
             var.type = "int" 
