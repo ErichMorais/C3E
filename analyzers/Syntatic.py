@@ -762,6 +762,70 @@ class Syntatic(object):
         sintE8.code = herdE8.code
         return True
 
+    def E9(self, varE9):
+        varE10 = sintE9 = herdE9 = C3E()
+        if (self.E10(varE10)):
+            herdE9.place = varE9.place
+            herdE9.code  = varE9.code
+            if (self.lineE9(herdE9, sintE9)):
+                varE9.place = sintE9.place
+                varE9.code  = sintE9.code
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def lineE9(self, herdE9, sintE9):
+        varE10 = sintE9Linha = herdE9Linha = C3E()
+        if (self.currentToken == 'TK_PLUS' or self.currentToken == 'TK_MINUS'):
+            op = self.currentLexeme()
+            self.nextToken()
+            if (self.E10(varE10)):
+                herdE9Linha.place = self.createTemp()
+                herdE9Linha.code = f'{herdE9.code + varE10.code + herdE9Linha.place} = {herdE9.place + op + varE10.place}\n'
+                if (self.lineE9(herdE9Linha, sintE9Linha)):
+                    sintE9.place = sintE9Linha.place
+                    sintE9.code = sintE9Linha.code
+                    return True
+                else:
+                    return False
+        sintE9.place = herdE9.place
+        sintE9.code = herdE9.code
+        return True
+
+    def E10(self, varE10):
+        varE11 = sintE10 = herdE10 = C3E()
+        if (self.E11(varE11)):
+            herdE10.place = varE10.place
+            herdE10.code  = varE10.code
+            if (self.lineE10(herdE10, sintE10)):
+                varE10.place = sintE10.place
+                varE10.code  = sintE10.code
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def lineE10(self, herdE10, sintE10):
+        varE11 = sintE10Linha = herdE10Linha = C3E()
+        if (self.currentToken == 'TK_STAR' or self.currentToken == 'TK_SLASH' or self.currentToken == 'TK_PERCENT'):
+            op = self.currentLexeme()
+            self.nextToken()
+            if (self.E11(varE11)):
+                herdE10Linha.place = self.createTemp()
+                herdE10Linha.code = f'{herdE10.code + varE11.code + herdE10Linha.place} = {herdE10.place + op + varE11.place}\n'
+                if (self.lineE10(herdE10Linha, sintE10Linha)):
+                    sintE10.place = sintE10Linha.place
+                    sintE10.code = sintE10Linha.code
+                    return True
+                else:
+                    return False
+        sintE10.place = herdE10.place
+        sintE10.code = herdE10.code
+        return True
+
     def Type(self, var):
         if self.currentToken == "TK_INT" :
             var.type = "int" 
