@@ -452,8 +452,8 @@ class Syntatic(object):
                                         rcvCode.code = firstExp.code + f'{iLabel}:\n {secExp.code} if {secExp.place} = 0 goto {fLabel}\n {c3eBlock.code+self.tempContinue}: \n {trdExp.code} goto {iLabel}\n {fLabel}' 
                                         return True
         return False     
-
-    #E -> E' E1 
+    #*************************************************************EXPRESSÕES*****************************************************************************
+    #E -> lineE E1
     def E(self, E): 
         varE1 = sintE = herdE = C3E()
         if (self.E1(varE1)):
@@ -468,7 +468,7 @@ class Syntatic(object):
         else: 
             return False
     
-    #E' -> ,E1 E' | e
+    #lineE -> ,E1 lineE | vazio
     def lineE(self, herdE, sintE):
         varE1 = sintELinha = herdELinha = C3E()
         if (self.currentToken == 'TK_COMMA'):
@@ -488,6 +488,7 @@ class Syntatic(object):
         sintE.code = herdE.code
         return True
 
+    #E1 -> E2 = E1 | E2 += E1 | E2 -= E1 | E2 *= E1 | E2 ÷= E1 | E2 %= E1 E2
     def E1(self, varE1):
         herdE1 = C3E()
         varE2 = C3E()
@@ -531,7 +532,7 @@ class Syntatic(object):
     #                 else return: False
     #      else: return False
 
-    # E2 -> E3 E2'
+    # E2 -> E3 lineE2
     def E2(self, varE2):
         varE3 = sintE2 = herdE2 = C3E()
         if (self.E3(varE2)):
@@ -547,7 +548,7 @@ class Syntatic(object):
             return False
 
 
-    # E2' -> || E3 E2' | e
+    # lineE2 -> || E3 lineE2 | vazio
     def lineE2(self, herdE2, sintE2):
         varE3 = sintE2Linha = herdE2Linha = C3E()
         if (self.currentToken == 'TK_OR'):
@@ -566,6 +567,7 @@ class Syntatic(object):
         sintE2.code = herdE2.code
         return True
 
+    #E3 -> E4 lineE3
     def E3(self, varE3):
         varE4 = sintE3 = herdE3 = C3E()
         if (self.E4(varE3)):
@@ -579,7 +581,8 @@ class Syntatic(object):
                 return False
         else:
             return False
-    
+
+    #lineE3 -> && E4 lineE3 | vazio
     def lineE3(self, herdE3, sintE3):
         varE4 = sintE3Linha = herdE3Linha = C3E()
         if (self.currentToken == 'TK_AND'):
@@ -597,7 +600,167 @@ class Syntatic(object):
         sintE3.place = herdE3.place
         sintE3.code = herdE3.code
         return True
+    #E4 -> E5 lineE4'
+    def E4(self, varE4):
+        varE5 = sintE4 = herdE4 = C3E()
+        if (self.E5(varE5)):
+            herdE4.place = varE4.place
+            herdE4.code  = varE4.code
+            if (self.lineE4(herdE4, sintE4)):
+                varE4.place = sintE4.place
+                varE4.code  = sintE4.code
+                return True
+            else:
+                return False
+        else:
+            return False
+    def lineE4(self, herdE4, sintE4):
+        varE5 = sintE4Linha = herdE4Linha = C3E()
+        if (self.currentToken == 'TK_LOGICOR'):
+            op = self.currentLexeme()
+            self.nextToken()
+            if (self.E5(varE5)):
+                herdE4Linha.place = self.createTemp()
+                herdE4Linha.code = f'{herdE4.code + varE5.code + herdE4Linha.place} = {herdE4.place + op + varE5.place}\n'
+                if (self.lineE4(herdE4Linha, sintE4Linha)):
+                    sintE4.place = sintE4Linha.place
+                    sintE4.code = sintE4Linha.code
+                    return True
+                else:
+                    return False
+        sintE4.place = herdE4.place
+        sintE4.code = herdE4.code
+        return True
 
+    #E5 -> E6 lineE5
+    def E5(self, varE5):
+        varE6 = sintE5 = herdE5 = C3E()
+        if (self.E6(varE6)):
+            herdE5.place = varE5.place
+            herdE5.code  = varE5.code
+            if (self.lineE5(herdE5, sintE5)):
+                varE5.place = sintE5.place
+                varE5.code  = sintE5.code
+                return True
+            else:
+                return False
+        else:
+            return False
+    #E5' -> | E6 E5' | e
+    def lineE5(self, herdE5, sintE5):
+        varE6 = sintE5Linha = herdE5Linha = C3E()
+        if (self.currentToken == 'TK_CIRCUMFLEX'):
+            op = self.currentLexeme()
+            self.nextToken()
+            if (self.E6(varE6)):
+                herdE5Linha.place = self.createTemp()
+                herdE5Linha.code = f'{herdE5.code + varE6.code + herdE5Linha.place} = {herdE5.place + op + varE6.place}\n'
+                if (self.lineE5(herdE5Linha, sintE5Linha)):
+                    sintE5.place = sintE5Linha.place
+                    sintE5.code = sintE5Linha.code
+                    return True
+                else:
+                    return False
+        sintE5.place = herdE5.place
+        sintE5.code = herdE5.code
+        return True
+
+    def E6(self, varE6):
+        varE7 = sintE6 = herdE6 = C3E()
+        if (self.E7(varE7)):
+            herdE6.place = varE6.place
+            herdE6.code  = varE6.code
+            if (self.lineE6(herdE6, sintE6)):
+                varE6.place = sintE6.place
+                varE6.code  = sintE6.code
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def lineE6(self, herdE6, sintE6):
+        varE7 = sintE6Linha = herdE6Linha = C3E()
+        if (self.currentToken == 'TK_LOGICAND'):
+            op = self.currentLexeme()
+            self.nextToken()
+            if (self.E7(varE7)):
+                herdE6Linha.place = self.createTemp()
+                herdE6Linha.code = f'{herdE6.code + varE7.code + herdE6Linha.place} = {herdE6.place + op + varE7.place}\n'
+                if (self.lineE6(herdE6Linha, sintE6Linha)):
+                    sintE6.place = sintE6Linha.place
+                    sintE6.code = sintE6Linha.code
+                    return True
+                else:
+                    return False
+        sintE6.place = herdE6.place
+        sintE6.code = herdE6.code
+        return True
+
+    def E7(self, varE7):
+        varE8 = sintE7 = herdE7 = C3E()
+        if (self.E8(varE8)):
+            herdE7.place = varE7.place
+            herdE7.code  = varE7.code
+            if (self.lineE7(herdE7, sintE7)):
+                varE7.place = sintE7.place
+                varE7.code  = sintE7.code
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def lineE7(self, herdE7, sintE7):
+        varE8 = sintE7Linha = herdE7Linha = C3E()
+        if (self.currentToken == 'TK_EQUALEQUAL' or self.currentToken == 'TK_NOTEQUAL'):
+            op = self.currentLexeme()
+            self.nextToken()
+            if (self.E8(varE8)):
+                herdE7Linha.place = self.createTemp()
+                herdE7Linha.code = f'{herdE7.code + varE8.code + herdE7Linha.place} = {herdE7.place + op + varE8.place}\n'
+                if (self.lineE7(herdE7Linha, sintE7Linha)):
+                    sintE7.place = sintE7Linha.place
+                    sintE7.code = sintE7Linha.code
+                    return True
+                else:
+                    return False
+        sintE7.place = herdE7.place
+        sintE7.code = herdE7.code
+        return True
+
+    def E8(self, varE8):
+        varE9 = sintE8 = herdE8 = C3E()
+        if (self.E9(varE9)):
+            herdE8.place = varE8.place
+            herdE8.code  = varE8.code
+            if (self.lineE8(herdE8, sintE8)):
+                varE8.place = sintE8.place
+                varE8.code  = sintE8.code
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def lineE8(self, herdE8, sintE8):
+        varE9 = sintE8Linha = herdE8Linha = C3E()
+        if (self.currentToken == 'TK_LESS' or self.currentToken == 'TK_GREATER' or
+            self.currentToken == 'TK_LESSEQUAL' or self.currentToken == 'TK_GREATEREQUAL'):
+            op = self.currentLexeme()
+            self.nextToken()
+            if (self.E9(varE9)):
+                herdE8Linha.place = self.createTemp()
+                herdE8Linha.code = f'{herdE8.code + varE9.code + herdE8Linha.place} = {herdE8.place + op + varE9.place}\n'
+                if (self.lineE8(herdE8Linha, sintE8Linha)):
+                    sintE8.place = sintE8Linha.place
+                    sintE8.code = sintE8Linha.code
+                    return True
+                else:
+                    return False
+        sintE8.place = herdE8.place
+        sintE8.code = herdE8.code
+        return True
 
     def Type(self, var):
         if self.currentToken == "TK_INT" :
