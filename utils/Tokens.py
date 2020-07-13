@@ -34,7 +34,7 @@ TOKENS = {
         #Ops
         "(": "TK_LEFTPAR",
         ")": "TK_RIGHTPAR",
-        ",": "TK_COMM",
+        ",": "TK_COMMA",
         ".": "TK_DOT",
         "'": "TK_BACKQUOTE",
         "{": "TK_LEFTBRAC",

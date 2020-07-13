@@ -57,8 +57,11 @@ class Syntatic(object):
     def isDeclaredVariable(self):
         symb = filter(lambda s: s.lexeme == self.currentLexeme(),self.symbolTable)
         try:
-            myVar = next(symb)
-            return myVar.isGlobal() or myVar.scope == self.currentScope
+            next(symb)
+            #myVar = next(symb)
+            # TODO Adicionar reconhecimento de escopo
+            return True
+            #return myVar.isGlobal() or myVar.scope == self.currentScope
         except:
             return False
 
@@ -394,7 +397,7 @@ class Syntatic(object):
                     if(self.blockCode(c3eBlock)):
                         endLabel = self.createLabel()
                         sintElse = self.ELSEcommand("", endLabel, elseCmd)
-                        rcvCode.code = expression.code + f'if {expression.place} = 0 goto {sintElse}\n' + c3eBlock.code +elseCmd+f'{endLabel}'
+                        rcvCode.code = expression.code + f'if {expression.place} = 0 goto {sintElse}\n' + c3eBlock.code +elseCmd.code+f'{endLabel}'
                         return True
         return False
 
@@ -513,7 +516,7 @@ class Syntatic(object):
                     if (op == '='):
                         varE1.code = f'{herdE1.code + varE2.code + varE2.place} = {varE1.place}\n'
                     else:
-                        varE1.code = f'{herdE1.code + varE2.code + varE2.place} = {varE2.place} {op.substring(0, 1)}{ varE1.place}\n'
+                        varE1.code = f'{herdE1.code + varE2.code + varE2.place} = {varE2.place} {op[0]}{ varE1.place}\n'
                     return True
                 else:
                     return False      
@@ -841,17 +844,17 @@ class Syntatic(object):
     def E11(self,varE11):
         if (self.currentToken == "TK_CONST_INT" or self.currentToken == "TK_CONST_REAL"):
             tempAtr = self.createTemp()
-            varE11.code += f'{tempAtr} = {self.currentLexeme}\n'
+            varE11.code += f'{tempAtr} = {self.currentLexeme()}\n'
             varE11.place = tempAtr
             self.nextToken()
             return True
         elif (self.currentToken == "TK_ID"):
             if (not self.isDeclaredVariable()):
-                print(f'Erro: variável {self.currentLexeme} não declarada.')
+                print(f'Erro: variável {self.currentLexeme()} não declarada.')
                 return False
 
             varE11.code = ""
-            varE11.place = self.currentLexeme
+            varE11.place = self.currentLexeme()
             self.nextToken()
             if (self.RE()):
                 return True

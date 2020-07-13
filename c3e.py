@@ -27,10 +27,10 @@ def main(argv):
             print(USAGE)
             sys.exit()
         elif opt in ("-i", "--ifile"):
-            inputfile = arg
+            inputfile = arg.lstrip()
             interactive = False
         elif opt in ("-o", "--ofile"):
-            outputfile = arg
+            outputfile = arg.lstrip()
         elif opt in ("-I", "--interactive"):
             interactive = interactive and True
  
@@ -73,7 +73,7 @@ def getUserInput():
     keyboard.add_hotkey('ctrl+enter',done)
     print("Lendo entrada, ctrl+enter para terminar")
     while editing:
-        ret.append(input())
+        ret.append(input() + '\n')
     
     return ret
 
