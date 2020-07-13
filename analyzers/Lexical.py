@@ -31,9 +31,9 @@ class Lexical(object):
                     continue
                 
                 if len(line) < col + 1:
-                    nextChar = line[col+1]
-                else:
                     nextChar = '\n'
+                else:
+                    nextChar = line[col+1]
                 
                 if cond.isExclamation(char) and cond.isEqual(nextChar):
                     if cond.isEqual(nextChar):
