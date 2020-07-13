@@ -30,7 +30,11 @@ class Lexical(object):
                     tokens.append(Token(char, row, col))
                     continue
                 
-                nextChar = line[col+1]
+                if len(line) < col + 1:
+                    nextChar = line[col+1]
+                else:
+                    nextChar = '\n'
+                
                 if cond.isExclamation(char) and cond.isEqual(nextChar):
                     if cond.isEqual(nextChar):
                         tokens.append(Token(char+nextChar, row, col))
