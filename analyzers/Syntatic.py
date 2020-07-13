@@ -17,6 +17,7 @@ class Variable(object):
 class Syntatic(object):
     def __init__(self, tokenList):
         self.tokenList = tokenList
+        self.nextToken()
 
     def __repr__(self):
         return f'tokenList: {self.tokenList}'
@@ -53,6 +54,14 @@ class Syntatic(object):
     def currentLexeme(self): 
         return self.tokenList[self.index].lexeme
 
+    def isDeclaredVariable(self):
+        symb = filter(lambda s: s.lexeme == self.currentLexeme(),self.symbolTable)
+        try:
+            myVar = next(symb)
+            return myVar.isGlobal() or myVar.scope == self.currentScope
+        except:
+            return False
+
     def createTemp(self):
         self.tempCont += 1
         return f'T{self.tempCont}'
@@ -62,15 +71,17 @@ class Syntatic(object):
         return f'L{self.labelCont}'
     
     def AddToSymbolTable(self, rcvVar):
-        actVar = self.symbolTable.index(lambda item: item.lexeme == self.currentLexeme())
-        print(self.symbolTable)
-        if (actVar):
+        symb = filter(lambda s: s.lexeme == self.currentLexeme(),self.symbolTable)
+        try:
+            next(symb)
             return False
-        else:
-            actVar.scope = self.currentScope
-            actVar.lexeme = self.currentLexeme()
-            self.symbolTable.append(actVar)
-            return True
+        except:
+            rcvVar.scope = self.currentScope
+            rcvVar.lexeme = self.currentLexeme()
+            self.symbolTable.append(rcvVar)
+            
+        return True
+            
     
 
     def analyser(self):
@@ -88,7 +99,7 @@ class Syntatic(object):
             ld.code += dec.code
             rld = C3E()
             if (self.RLD(rld)):
-                ld.Code += rld.code
+                ld.code += rld.code
                 return True
             else: return False
         else: return False
@@ -825,6 +836,59 @@ class Syntatic(object):
         sintE10.place = herdE10.place
         sintE10.code = herdE10.code
         return True
+    
+    # E11 -> cte | id RE | (E)
+    def E11(self,varE11):
+        if (self.currentToken == "TK_CONST_INT" or self.currentToken == "TK_CONST_REAL"):
+            tempAtr = self.createTemp()
+            varE11.code += f'{tempAtr} = {self.currentLexeme}\n'
+            varE11.place = tempAtr
+            self.nextToken()
+            return True
+        elif (self.currentToken == "TK_ID"):
+            if (not self.isDeclaredVariable()):
+                print(f'Erro: variável {self.currentLexeme} não declarada.')
+                return False
+
+            varE11.code = ""
+            varE11.place = self.currentLexeme
+            self.nextToken()
+            if (self.RE()):
+                return True
+            else:
+                return False
+        elif (self.currentToken == "TK_LEFTPAR"):
+            self.nextToken()
+            exp = C3E()
+            if (self.E(exp)):
+                varE11.place = exp.place
+                varE11.code = exp.code
+                if (self.currentToken == "TK_RIGHTPAR"):
+                    self.nextToken()
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
+    
+    # RE -> (LP) | e
+    def RE(self):
+        if(self.currentToken == "TK_LEFTPAR"):
+            self.nextToken()
+            if (self.LP()):
+                if (self.currentToken == "TK_RIGHTPAR"):
+                    self.nextToken()
+                    return True
+                else:
+                    print(f'Erro: esperava token ")" na linha {self.currentLine()} coluna {self.currentColumn()}.')
+                    return False
+            else:
+                return False
+        else:
+            return True
+        
 
     def Type(self, var):
         if self.currentToken == "TK_INT" :
