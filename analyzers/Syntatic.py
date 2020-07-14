@@ -98,7 +98,7 @@ class Syntatic(object):
     def LD(self, ld):
         dec = C3E()
         if (self.DEC(dec)):
-            print(dec)
+            #print(dec)
             ld.code += dec.code
             rld = C3E()
             if (self.RLD(rld)):
@@ -110,7 +110,7 @@ class Syntatic(object):
     def RLD(self, rld):
         ld = C3E()
         if (self.LD(ld)):
-            print(ld)
+            #print(ld)
             rld.code += ld.code
             return True
         else: return True
@@ -118,7 +118,7 @@ class Syntatic(object):
     def DEC(self, dec):
         var = Variable()
         if (self.Type(var)):
-            print(var)
+            #print(var)
             self.nextToken()
             if (self.currentToken == "TK_ID"):
                 if (not self.AddToSymbolTable(var)):
@@ -443,7 +443,8 @@ class Syntatic(object):
                             self.nextToken()
                             if(self.currentToken == "TK_SEMICOLON"):
                                 self.nextToken()
-                                rcvCode.code = f'{iLabel}+\n {c3eBlock + expression.code} if {expression.place} = 0 goto {iLabel}\n {fLabel}:\n'
+                                rcvCode.code =  f'{iLabel}+\n {c3eBlock.code + expression.code} if {expression.place} = 0 goto {fLabel}\n'
+                                rcvCode.code += f'goto {iLabel}\n{fLabel}:\n'
                                 return True
         return False
 
