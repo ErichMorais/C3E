@@ -35,14 +35,23 @@ def main(argv):
             interactive = interactive and True
  
 
-    lexical  = Lexical()
-
+    file = ""
     if not interactive:
         with open(inputfile, 'r') as f:
             file = f.readlines()
+            doAnalisis(file,outputfile)
     else:
-        file = getUserInput()
+        while True:
+            file = getUserInput()
+            doAnalisis(file,outputfile)
+            resp = input("Continuar ? s/n ")
+            if resp == 's':
+                continue
+            break
 
+
+def doAnalisis(file,outputfile):
+    lexical  = Lexical()
     tokensList = lexical.analyser(file)
     syntatic = Syntatic(tokensList)
 
@@ -63,7 +72,6 @@ def main(argv):
         else:
             print("Não foi possível gerar o código C3E")
 
-
 def printLex(lex):
     for l in lex:
         print(l)
@@ -80,6 +88,8 @@ def getUserInput():
     while editing:
         ret.append(input() + '\n')
     
+    keyboard.clear_all_hotkeys()
+
     return ret
 
 
