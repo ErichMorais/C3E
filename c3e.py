@@ -53,10 +53,10 @@ def main(argv):
     if result:
         if outputfile != '':
             with open(outputfile,'w') as o:
-                o.write(syntatic.resultCode)
+                o.write(syntatic.resultCode.code)
                 o.close
         else:
-            print(syntatic.resultCode)
+            print(syntatic.resultCode.code)
 
 
 def printLex(lex):

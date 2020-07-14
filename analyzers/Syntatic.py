@@ -550,7 +550,7 @@ class Syntatic(object):
     # E2 -> E3 lineE2
     def E2(self, varE2):
         varE3 = sintE2 = herdE2 = C3E()
-        if (self.E3(varE2)):
+        if (self.E3(varE3)):
             herdE2.place = varE3.place
             herdE2.code  = varE3.code
             if (self.lineE2(herdE2, sintE2)):
@@ -585,10 +585,10 @@ class Syntatic(object):
     #E3 -> E4 lineE3
     def E3(self, varE3):
         varE4 = sintE3 = herdE3 = C3E()
-        if (self.E4(varE3)):
+        if (self.E4(varE4)):
             herdE3.place = varE4.place
             herdE3.code  = varE4.code
-            if (self.lineE2(herdE3, sintE3)):
+            if (self.lineE3(herdE3, sintE3)):
                 varE3.place = sintE3.place
                 varE3.code = sintE3.code
                 return True
@@ -619,8 +619,8 @@ class Syntatic(object):
     def E4(self, varE4):
         varE5 = sintE4 = herdE4 = C3E()
         if (self.E5(varE5)):
-            herdE4.place = varE4.place
-            herdE4.code  = varE4.code
+            herdE4.place = varE5.place
+            herdE4.code  = varE5.code
             if (self.lineE4(herdE4, sintE4)):
                 varE4.place = sintE4.place
                 varE4.code  = sintE4.code
@@ -651,8 +651,8 @@ class Syntatic(object):
     def E5(self, varE5):
         varE6 = sintE5 = herdE5 = C3E()
         if (self.E6(varE6)):
-            herdE5.place = varE5.place
-            herdE5.code  = varE5.code
+            herdE5.place = varE6.place
+            herdE5.code  = varE6.code
             if (self.lineE5(herdE5, sintE5)):
                 varE5.place = sintE5.place
                 varE5.code  = sintE5.code
@@ -683,8 +683,8 @@ class Syntatic(object):
     def E6(self, varE6):
         varE7 = sintE6 = herdE6 = C3E()
         if (self.E7(varE7)):
-            herdE6.place = varE6.place
-            herdE6.code  = varE6.code
+            herdE6.place = varE7.place
+            herdE6.code  = varE7.code
             if (self.lineE6(herdE6, sintE6)):
                 varE6.place = sintE6.place
                 varE6.code  = sintE6.code
@@ -715,8 +715,8 @@ class Syntatic(object):
     def E7(self, varE7):
         varE8 = sintE7 = herdE7 = C3E()
         if (self.E8(varE8)):
-            herdE7.place = varE7.place
-            herdE7.code  = varE7.code
+            herdE7.place = varE8.place
+            herdE7.code  = varE8.code
             if (self.lineE7(herdE7, sintE7)):
                 varE7.place = sintE7.place
                 varE7.code  = sintE7.code
@@ -747,8 +747,8 @@ class Syntatic(object):
     def E8(self, varE8):
         varE9 = sintE8 = herdE8 = C3E()
         if (self.E9(varE9)):
-            herdE8.place = varE8.place
-            herdE8.code  = varE8.code
+            herdE8.place = varE9.place
+            herdE8.code  = varE9.code
             if (self.lineE8(herdE8, sintE8)):
                 varE8.place = sintE8.place
                 varE8.code  = sintE8.code
@@ -780,8 +780,8 @@ class Syntatic(object):
     def E9(self, varE9):
         varE10 = sintE9 = herdE9 = C3E()
         if (self.E10(varE10)):
-            herdE9.place = varE9.place
-            herdE9.code  = varE9.code
+            herdE9.place = varE10.place
+            herdE9.code  = varE10.code
             if (self.lineE9(herdE9, sintE9)):
                 varE9.place = sintE9.place
                 varE9.code  = sintE9.code
@@ -812,8 +812,8 @@ class Syntatic(object):
     def E10(self, varE10):
         varE11 = sintE10 = herdE10 = C3E()
         if (self.E11(varE11)):
-            herdE10.place = varE10.place
-            herdE10.code  = varE10.code
+            herdE10.place = varE11.place
+            herdE10.code  = varE11.code
             if (self.lineE10(herdE10, sintE10)):
                 varE10.place = sintE10.place
                 varE10.code  = sintE10.code
