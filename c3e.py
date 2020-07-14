@@ -37,9 +37,14 @@ def main(argv):
 
     file = ""
     if not interactive:
-        with open(inputfile, 'r') as f:
-            file = f.readlines()
-            doAnalisis(file,outputfile)
+        if inputfile != '':
+            print(f'Abrindo arquivo {inputfile} ...')
+            with open(inputfile, 'r') as f:
+                file = f.readlines()
+                doAnalisis(file,outputfile)
+                f.close
+        else:
+            print('Por favor especifique um arquivo de entrada.')
     else:
         while True:
             file = getUserInput()
@@ -62,9 +67,13 @@ def doAnalisis(file,outputfile):
 
     if outputfile != '':
         if result:
+            print(f"\nGravando C3E em {outputfile} ...")
             with open(outputfile,'w') as o:
                 o.write(syntatic.resultCode.code)
                 o.close
+                print("Pronto!")
+        else:
+            print("Não foi possível gerar o código C3E")
     else:
         print("\nCodigo C3E:")
         if result:            

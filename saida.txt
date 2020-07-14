@@ -1,0 +1,19 @@
+T0 = 0
+i = T0
+L0:
+T1 = 10
+T2 = i<T1
+if T2 = 0 goto L1
+T4 = 5
+alt = T4
+T5 = 2
+T6 = i==T5
+if T6 = 0 goto L3
+goto L2
+L3:
+alt = alt*i
+L2:
+T3 = 1
+i = i+T3
+goto L0
+L1:
