@@ -162,7 +162,7 @@ class Syntatic(object):
                 if self.currentToken == "TK_CONST_INT":
                     self.nextToken()
                     if(self.currentToken == "TK_SEMICOLON"):
-                        dec.code += f"{aux} = {constant}\n {var.lexeme} = {aux}"
+                        dec.code += f"{aux} = {constant}\n{var.lexeme} = {aux}\n"
                         self.nextToken()
                         return True
                     else:

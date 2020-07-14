@@ -46,6 +46,7 @@ def main(argv):
     tokensList = lexical.analyser(file)
     syntatic = Syntatic(tokensList)
 
+    print("Análise Léxica:")
     printLex(tokensList)
 
     result = syntatic.analyser()
@@ -55,7 +56,8 @@ def main(argv):
             with open(outputfile,'w') as o:
                 o.write(syntatic.resultCode.code)
                 o.close
-        else:
+        else:            
+            print("\nCodigo C3E:")
             print(syntatic.resultCode.code)
 
 
