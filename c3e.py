@@ -51,14 +51,17 @@ def main(argv):
 
     result = syntatic.analyser()
 
-    if result:
-        if outputfile != '':
+    if outputfile != '':
+        if result:
             with open(outputfile,'w') as o:
                 o.write(syntatic.resultCode.code)
                 o.close
-        else:            
-            print("\nCodigo C3E:")
+    else:
+        print("\nCodigo C3E:")
+        if result:            
             print(syntatic.resultCode.code)
+        else:
+            print("Não foi possível gerar o código C3E")
 
 
 def printLex(lex):
