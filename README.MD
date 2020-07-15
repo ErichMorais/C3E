@@ -13,9 +13,9 @@ Será necessario instalar a lib Keyboard (https://pypi.org/project/keyboard/) e 
 $ pip3 install keyboard  
 $ sudo python3 c3e.py -i archives/entrada.txt
 
-Para utilizar o programa em modo Iterativo(escrever o código de entrada), deve se utilizar o parametro -I
-$ python3 c3e.py -I
-$ *(Código..)*
-$ Ctrl+Enter para executar
+Para utilizar o programa em modo Iterativo(escrever o código de entrada), deve se utilizar o parametro -I  
+$ python3 c3e.py -I  
+$ *(Código..)*  
+$ Ctrl+Enter para executar  
 
-Autores: Erich Morais e William Steffler
+Autores: Erich Morais e William Steffler  
