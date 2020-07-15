@@ -296,7 +296,7 @@ class Syntatic(object):
                     self.nextToken()
                     return True
                 else:
-                    print(f"Erro: esperava token "+ '}' + f"ou ; na linha {self.currentRow()} coluna {self.currentColumn()}.")
+                    print(f"Erro: esperava token "+ '}' + f" ou ; na linha {self.currentRow()} coluna {self.currentColumn()}.")
         return False
 
     def LCD(self, lcd):
