@@ -1,8 +1,8 @@
 DEBUG = False
-class C3E(object):
+class threeAddressCode(object):
     def __init__(self, place='', code=''):
         self.place = place
-        self.code = code
+        self.code = code 
     def __repr__(self):
         return f'place: {self.place}, code: {self.code}'
 
@@ -34,10 +34,7 @@ class Syntatic(object):
 
     tempFim = ''
     tempContinue = ''
-    resultCode = C3E()
-
-    def erroToken(self):
-        return self.tokenList[self.index]
+    resultCode = threeAddressCode()
         
     def nextToken(self):
         self.index = self.index + 1
@@ -46,7 +43,7 @@ class Syntatic(object):
         else:
             self.currentToken = None
         
-    def currentLine(self):
+    def currentRow(self):
         return self.tokenList[self.index].row
 
     def currentColumn(self):
@@ -55,26 +52,24 @@ class Syntatic(object):
     def currentLexeme(self): 
         return self.tokenList[self.index].lexeme
 
-    def isDeclaredVariable(self):
+    def alreadyExists(self):
         symb = filter(lambda s: s.lexeme == self.currentLexeme(),self.symbolTable)
         try:
             next(symb)
-            #myVar = next(symb)
             # TODO Adicionar reconhecimento de escopo
             return True
-            #return myVar.isGlobal() or myVar.scope == self.currentScope
         except:
             return False
 
-    def createTemp(self):
+    def newTemp(self):
         self.tempCont += 1
         return f'T{self.tempCont}'
     
-    def createLabel(self):
+    def newLabel(self):
         self.labelCont += 1
         return f'L{self.labelCont}'
     
-    def AddToSymbolTable(self, rcvVar):
+    def verifyExistance(self, rcvVar):
         symb = filter(lambda s: s.lexeme == self.currentLexeme(),self.symbolTable)
         try:
             next(symb)
@@ -87,9 +82,8 @@ class Syntatic(object):
         return True
             
     
-
     def analyser(self):
-        ld = C3E()
+        ld = threeAddressCode()
         if (self.LD(ld)):
             self.resultCode.code += ld.code
             if (self.currentToken == 'TK_EOF'):
@@ -97,11 +91,11 @@ class Syntatic(object):
         return False
 
     def LD(self, ld):
-        dec = C3E()
+        dec = threeAddressCode()
         if (self.DEC(dec)):
             #print(dec)
             ld.code += dec.code
-            rld = C3E()
+            rld = threeAddressCode()
             if (self.RLD(rld)):
                 ld.code += rld.code
                 Debug(f'Debug73: {ld.place} || {ld.code}')
@@ -110,7 +104,7 @@ class Syntatic(object):
         else: return False
 
     def RLD(self, rld):
-        ld = C3E()
+        ld = threeAddressCode()
         if (self.LD(ld)):
             #print(ld)
             rld.code += ld.code
@@ -124,7 +118,7 @@ class Syntatic(object):
             #print(var)
             self.nextToken()
             if (self.currentToken == "TK_ID"):
-                if (not self.AddToSymbolTable(var)):
+                if (not self.verifyExistance(var)):
                     print(f"Variável {var.lexeme} já está em uso.", )
                     return False
                 self.nextToken()
@@ -133,11 +127,10 @@ class Syntatic(object):
                 else:
                     return False
             else:
-                print(f"Erro: esperava token 'id' na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                print(f"Erro: esperava token 'id' na linha {self.currentRow()} coluna {self.currentColumn()}.")
                 return False           
         else: return False
         
-        #Parei aqui Continuar RDEC Começar a pensar em UI 
     def RDEC(self, dec, var):
         if self.currentToken == "TK_COMMA":
             self.nextToken()
@@ -148,7 +141,7 @@ class Syntatic(object):
         elif self.currentToken == "TK_LEFTPAR":
             self.currentScope = var.lexeme
             self.nextToken()
-            df = C3E()
+            df = threeAddressCode()
             if(self.DF(df)):
                 dec.code += df.code
                 Debug(f'Debug71: {dec.place} || {dec.code}')
@@ -161,7 +154,7 @@ class Syntatic(object):
         elif self.currentToken == "TK_EQUAL":
             self.nextToken()
             constant = self.currentLexeme()
-            aux = self.createTemp()
+            aux = self.newTemp()
             if(var.type == 'int'):
                 if self.currentToken == "TK_CONST_INT":
                     self.nextToken()
@@ -172,11 +165,11 @@ class Syntatic(object):
                         return True
                     else:
                         ##TODO CRIAR ALERTAS
-                        print(f'Erro: esperava o token ";" na linha {self.currentLine()} coluna ${self.currentColumn()}.')
+                        print(f'Erro: esperava o token ";" na linha {self.currentRow()} coluna ${self.currentColumn()}.')
                         return False
                 else:
                     #TODO CRIAR ALERTAS
-                    print(f'Erro: esperava o token "const_int" na linha {self.currentLine()} coluna ${self.currentColumn()}.')
+                    print(f'Erro: esperava o token "const_int" na linha {self.currentRow()} coluna ${self.currentColumn()}.')
 
                     return False
             if(var.type == 'float'):
@@ -188,25 +181,23 @@ class Syntatic(object):
                         self.nextToken()
                         return True
                     else:
-                        ##TODO CRIAR ALERTAS
-                        print(f'Erro: esperava o token ";" na linha {self.currentLine()} coluna ${self.currentColumn()}.')                        
+                        print(f'Erro: esperava o token ";" na linha {self.currentRow()} coluna ${self.currentColumn()}.')                        
                         return False
                 else:
-                    #TODO CRIAR ALERTAS
-                    print(f'Erro: esperava o token "const_real" na linha {self.currentLine()} coluna ${self.currentColumn()}.')
+                    print(f'Erro: esperava o token "const_real" na linha {self.currentRow()} coluna ${self.currentColumn()}.')
                     return False
             else:
-                print(f'Erro: esperava o o tipo int ou float na linha {self.currentLine()} coluna ${self.currentColumn()}.')
+                print(f'Erro: esperava o o tipo int ou float na linha {self.currentRow()} coluna ${self.currentColumn()}.')
                 return False
         else:
-                print(f'Erro: esperava o  ;, ) ou , na linha {self.currentLine()} coluna ${self.currentColumn()}.')
+                print(f'Erro: esperava o  ;, ) ou , na linha {self.currentRow()} coluna ${self.currentColumn()}.')
                 return False
 
     def DV(self, rcvtype):
         var = Variable()
         var.type = rcvtype
         if (self.currentToken == 'TK_ID'):
-            if (not self.AddToSymbolTable(var)):
+            if (not self.verifyExistance(var)):
                 return False
             self.nextToken()
             if( self.RDV(rcvtype)):
@@ -214,7 +205,7 @@ class Syntatic(object):
             else:
                 return False
         else:
-            print(f"Erro: esperava token 'id' na linha {self.currentLine()} coluna {self.currentColumn()}.")
+            print(f"Erro: esperava token 'id' na linha {self.currentRow()} coluna {self.currentColumn()}.")
             return False
 
     def RDV(self, rcvtype):
@@ -228,16 +219,16 @@ class Syntatic(object):
             self.nextToken()
             return True
         else:
-            print(f"Erro: esperava token , ou ; na linha {self.currentLine()} coluna {self.currentColumn()}.")
+            print(f"Erro: esperava token , ou ; na linha {self.currentRow()} coluna {self.currentColumn()}.")
             return False
 
     def DF(self, df):
         if(self.LP()):
             if (self.currentToken == 'TK_RIGHTPAR'):
                 self.nextToken()
-                c3eBlock = C3E()
-                if (self.blockCode(c3eBlock)):
-                    df.code += c3eBlock.code
+                threeAddressCodeBlock = threeAddressCode()
+                if (self.blockCode(threeAddressCodeBlock)):
+                    df.code += threeAddressCodeBlock.code
                     Debug(f'Debug68: {df.place} || {df.code}')
                     return True
                 elif(self.currentToken == 'TK_SEMICOLON'):
@@ -245,10 +236,10 @@ class Syntatic(object):
                     self.nextToken()
                     return True
                 else:
-                    print(f"Erro: esperava token "+ '{' + f"ou ; na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                    print(f"Erro: esperava token "+ '{' + f"ou ; na linha {self.currentRow()} coluna {self.currentColumn()}.")
                     return False
             else:
-                    print(f"Erro: esperava token "+ ')' + f"ou ; na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                    print(f"Erro: esperava token "+ ')' + f"ou ; na linha {self.currentRow()} coluna {self.currentColumn()}.")
                     return False
         else:
             return False
@@ -258,7 +249,7 @@ class Syntatic(object):
         if (self.Type(var)):
             self.nextToken()
             if self.currentToken == 'TK_ID':
-                if (not self.AddToSymbolTable(var)):
+                if (not self.verifyExistance(var)):
                     return False
                 self.nextToken()
                 if (self.RLP()):
@@ -266,7 +257,7 @@ class Syntatic(object):
                 else:
                     return False
             else:
-                print(f"Erro: esperava token 'id' na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                print(f"Erro: esperava token 'id' na linha {self.currentRow()} coluna {self.currentColumn()}.")
                 return False
         else:
             return True
@@ -278,7 +269,7 @@ class Syntatic(object):
             if(self.Type(var)):
                 self.nextToken()
                 if(self.currentToken == 'TK_ID'):
-                    if (not self.AddToSymbolTable(var)):
+                    if (not self.verifyExistance(var)):
                         return False
                     self.nextToken()
                     if (self.RLP()):
@@ -286,31 +277,31 @@ class Syntatic(object):
                     else:
                         return False
                 else:
-                    print(f"Erro: esperava token 'id' na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                    print(f"Erro: esperava token 'id' na linha {self.currentRow()} coluna {self.currentColumn()}.")
                     return False
             else:
                 return False
         else:
             return True
     
-    def blockCode(self, c3eBlock):
+    def blockCode(self, threeAddressCodeBlock):
         if(self.currentToken == 'TK_LEFTBRAC'):
             self.nextToken()
-            lcd = C3E()
+            lcd = threeAddressCode()
             if(self.LCD(lcd)):
-                c3eBlock.code += lcd.code
-                Debug(f'Debug67: {c3eBlock.place} || {c3eBlock.code}')
+                threeAddressCodeBlock.code += lcd.code
+                Debug(f'Debug67: {threeAddressCodeBlock.place} || {threeAddressCodeBlock.code}')
                 if(self.currentToken == 'TK_RIGHTBRAC'):
                     self.currentScope = 'Global'
                     self.nextToken()
                     return True
                 else:
-                    print(f"Erro: esperava token "+ '}' + f"ou ; na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                    print(f"Erro: esperava token "+ '}' + f"ou ; na linha {self.currentRow()} coluna {self.currentColumn()}.")
         return False
 
     def LCD(self, lcd):
         var = Variable()
-        cmd = C3E()
+        cmd = threeAddressCode()
         if(self.COM(cmd)):
             lcd.code += cmd.code
             Debug(f'Debug66: {lcd.place} || {lcd.code}')
@@ -332,7 +323,7 @@ class Syntatic(object):
 
     # TODO Implementar def de comandos da especificacao
     def COM(self, cmd):
-        expression = C3E()
+        expression = threeAddressCode()
         var = Variable()
         #Que deus nos elimine 
         if (self.currentToken == "TK_IF"):
@@ -368,10 +359,10 @@ class Syntatic(object):
         elif (self.Type(var)) :
             self.nextToken()    
             if(self.currentToken == 'TK_ID'):
-                if (not self.AddToSymbolTable(var)):
+                if (not self.verifyExistance(var)):
                     return False
                 self.nextToken()  
-                rdec = C3E()  
+                rdec = threeAddressCode()  
                 if(self.RDEC(rdec, var)):
                     cmd.code +=rdec.code
                     Debug(f'Debug63: {cmd.place} || {cmd.code}')
@@ -379,7 +370,7 @@ class Syntatic(object):
                 else:
                     return False
             else:
-                print(f"Erro: esperava token 'id' na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                print(f"Erro: esperava token 'id' na linha {self.currentRow()} coluna {self.currentColumn()}.")
                 return False
         elif(self.E(expression)):
             cmd.code += expression.code
@@ -395,35 +386,35 @@ class Syntatic(object):
                 self.nextToken()
                 return True
             else:
-                print(f"Erro: esperava token ; na linha {self.currentLine()} coluna {self.currentColumn()}.")
+                print(f"Erro: esperava token ; na linha {self.currentRow()} coluna {self.currentColumn()}.")
                 return False
         else:
             return False
 
     def IFcommand(self, rcvCode):
-        expression = C3E()
-        c3eBlock = C3E()
-        elseCmd =  C3E()
+        expression = threeAddressCode()
+        threeAddressCodeBlock = threeAddressCode()
+        elseCmd =  threeAddressCode()
         if(self.currentToken == "TK_LEFTPAR"):
             self.nextToken()
             if(self.E(expression)):
                 if(self.currentToken == "TK_RIGHTPAR"):
                     self.nextToken()
-                    if(self.blockCode(c3eBlock)):
-                        endLabel = self.createLabel()
+                    if(self.blockCode(threeAddressCodeBlock)):
+                        endLabel = self.newLabel()
                         sintElse = self.ELSEcommand("", endLabel, elseCmd)
-                        rcvCode.code = expression.code + f'if {expression.place} = 0 goto {sintElse}\n' + c3eBlock.code +elseCmd.code+f'{endLabel}:\n'
+                        rcvCode.code = expression.code + f'if {expression.place} = 0 goto {sintElse}\n' + threeAddressCodeBlock.code +elseCmd.code+f'{endLabel}:\n'
                         Debug(f'Debug61: {rcvCode.place} || {rcvCode.code}')
                         return True
         return False
 
     def ELSEcommand(self,sintElse, endLabel, elseCmd):
-        c3eBlock = C3E()
+        threeAddressCodeBlock = threeAddressCode()
         if(self.currentToken == "TK_ELSE"):
             self.nextToken()
-            if(self.blockCode(c3eBlock)):
-                elseLabel = self.createLabel()
-                elseCmd.code = f'goto {endLabel} \n{elseLabel}:\n' + c3eBlock.code
+            if(self.blockCode(threeAddressCodeBlock)):
+                elseLabel = self.newLabel()
+                elseCmd.code = f'goto {endLabel} \n{elseLabel}:\n' + threeAddressCodeBlock.code
                 Debug(f'Debug60: {elseCmd.place} || {elseCmd.code}')
                 sintElse = elseLabel
                 return sintElse
@@ -431,29 +422,29 @@ class Syntatic(object):
         return sintElse
 
     def WHILEcommand(self, rcvCode):
-        expression =  C3E()
-        c3eBlock = C3E()
+        expression =  threeAddressCode()
+        threeAddressCodeBlock = threeAddressCode()
         if(self.currentToken == "TK_LEFTPAR"):
             self.nextToken()
             if(self.E(expression)):
                 if(self.currentToken == "TK_RIGHTPAR"):
                     self.nextToken()
-                    self.tempContinue = iLabel = self.createLabel()
-                    self.tempFim = fLabel = self.createLabel()
-                    if(self.blockCode(c3eBlock)):
-                        rcvCode.code = f'{iLabel}:\n{expression.code}if {expression.place} = 0 goto {fLabel}\n{c3eBlock.code}goto {iLabel}\n{fLabel}:\n'
+                    self.tempContinue = iLabel = self.newLabel()
+                    self.tempFim = fLabel = self.newLabel()
+                    if(self.blockCode(threeAddressCodeBlock)):
+                        rcvCode.code = f'{iLabel}:\n{expression.code}if {expression.place} = 0 goto {fLabel}\n{threeAddressCodeBlock.code}goto {iLabel}\n{fLabel}:\n'
                         Debug(f'Debug59: {rcvCode.place} || {rcvCode.code}')
                         return True
         return False
 
     def DOWHILEcommand(self,rcvCode):
-        expression  = C3E()
-        c3eBlock = C3E()
-        iLabel = self.createLabel()
-        fLabel = self.createLabel()
+        expression  = threeAddressCode()
+        threeAddressCodeBlock = threeAddressCode()
+        iLabel = self.newLabel()
+        fLabel = self.newLabel()
         self.tempFim = fLabel
         self.tempContinue = iLabel
-        if(self.blockCode(c3eBlock)):
+        if(self.blockCode(threeAddressCodeBlock)):
             if(self.currentToken == "TK_WHILE"):
                 self.nextToken()
                 if(self.currentToken == "TK_LEFTPAR"):
@@ -463,17 +454,17 @@ class Syntatic(object):
                             self.nextToken()
                             if(self.currentToken == "TK_SEMICOLON"):
                                 self.nextToken()
-                                rcvCode.code =  f'{iLabel}:\n{c3eBlock.code + expression.code}if {expression.place} = 0 goto {fLabel}\n'
+                                rcvCode.code =  f'{iLabel}:\n{threeAddressCodeBlock.code + expression.code}if {expression.place} = 0 goto {fLabel}\n'
                                 rcvCode.code += f'goto {iLabel}\n{fLabel}:\n'
                                 Debug(f'Debug58: {rcvCode.place} || {rcvCode.code}')
                                 return True
         return False
 
     def FORcommand(self, rcvCode):
-        firstExp = C3E()
-        secExp = C3E()
-        trdExp = C3E()
-        c3eBlock = C3E()
+        firstExp = threeAddressCode()
+        secExp = threeAddressCode()
+        trdExp = threeAddressCode()
+        threeAddressCodeBlock = threeAddressCode()
 
         if(self.currentToken == "TK_LEFTPAR"):
             self.nextToken()
@@ -486,20 +477,20 @@ class Syntatic(object):
                             if(self.E(trdExp)):
                                 if(self.currentToken == "TK_RIGHTPAR"):
                                     self.nextToken()
-                                    iLabel = self.createLabel()
-                                    self.tempFim = fLabel = self.createLabel()
-                                    self.tempContinue = self.createLabel()
-                                    if(self.blockCode(c3eBlock)):
-                                        rcvCode.code = firstExp.code + f'{iLabel}:\n{secExp.code}if {secExp.place} = 0 goto {fLabel}\n{c3eBlock.code+self.tempContinue}:\n{trdExp.code}goto {iLabel}\n{fLabel}:\n'
+                                    iLabel = self.newLabel()
+                                    self.tempFim = fLabel = self.newLabel()
+                                    self.tempContinue = self.newLabel()
+                                    if(self.blockCode(threeAddressCodeBlock)):
+                                        rcvCode.code = firstExp.code + f'{iLabel}:\n{secExp.code}if {secExp.place} = 0 goto {fLabel}\n{threeAddressCodeBlock.code+self.tempContinue}:\n{trdExp.code}goto {iLabel}\n{fLabel}:\n'
                                         Debug(f'Debug57: {rcvCode.place} || {rcvCode.code}')
                                         return True
         return False     
     #*************************************************************EXPRESSÕES*****************************************************************************
     #E -> lineE E1
     def E(self, E): 
-        varE1 = C3E()
-        sintE = C3E()
-        herdE = C3E()
+        varE1 = threeAddressCode()
+        sintE = threeAddressCode()
+        herdE = threeAddressCode()
         if (self.E1(varE1)):
             herdE.place = varE1.place
             herdE.code = varE1.code
@@ -516,14 +507,14 @@ class Syntatic(object):
     
     #lineE -> ,E1 lineE | vazio
     def lineE(self, herdE, sintE):
-        varE1 = C3E()
-        sintELinha = C3E()
-        herdELinha = C3E()
+        varE1 = threeAddressCode()
+        sintELinha = threeAddressCode()
+        herdELinha = threeAddressCode()
         if (self.currentToken == 'TK_COMMA'):
             op = self.currentLexeme()
             self.nextToken()
             if (self.E1(varE1)):
-                herdELinha.place = self.createTemp()
+                herdELinha.place = self.newTemp()
                 herdELinha.code = (herdE.code + varE1.code + 
                 f'{herdELinha.place} = {herdE.place} {op} {varE1.place}\n')
                 Debug(f'Debug54: {herdELinha.place} || {herdELinha.code}')
@@ -541,8 +532,8 @@ class Syntatic(object):
 
     #E1 -> E2 = E1 | E2 += E1 | E2 -= E1 | E2 *= E1 | E2 ÷= E1 | E2 %= E1 E2
     def E1(self, varE1):
-        herdE1 = C3E()
-        varE2 = C3E()
+        herdE1 = threeAddressCode()
+        varE2 = threeAddressCode()
         if (self.E2(varE2)):
             if (self.currentToken == 'TK_EQUAL' or self.currentToken == 'TK_STAREQUAL' or self.currentToken == 'TK_SLASHEQUAL'
                 or self.currentToken == 'TK_PERCENTEQUAL' or self.currentToken == 'TK_PLUSEQUAL' or self.currentToken == 'TK_MINEQUAL'):
@@ -567,30 +558,11 @@ class Syntatic(object):
         else:
             return False
 
-    # def E2(self, sintExpression, herdExpression):
-    #     if (self.E2(sintExpression)):
-    #         if (self.lineE2(sintExpression, herdExpression)):
-    #             return True
-    #         else:
-    #             return False
-    #     else:
-    #         return False
-
-    # def lineE2(self, exp_s, exp_h):
-    #     if (self.E2(exp_s, exp_h)):
-    #         if (self.currentToken == 'TK_COLON'):
-    #             self.nextToken()    
-    #             if (self.E2(exp_s, exp_h)):
-    #                 if (self.E2Linha(exp_s, exp_h)):
-    #                     return True
-    #                 else return: False
-    #      else: return False
-
     # E2 -> E3 lineE2
     def E2(self, varE2):
-        varE3 = C3E()
-        sintE2 = C3E()
-        herdE2 = C3E()
+        varE3 = threeAddressCode()
+        sintE2 = threeAddressCode()
+        herdE2 = threeAddressCode()
         if (self.E3(varE3)):
             herdE2.place = varE3.place
             herdE2.code  = varE3.code
@@ -605,17 +577,16 @@ class Syntatic(object):
         else:
             return False
 
-
     # lineE2 -> || E3 lineE2 | vazio
     def lineE2(self, herdE2, sintE2):
-        varE3 = C3E()
-        sintE2Linha = C3E() 
-        herdE2Linha = C3E()
+        varE3 = threeAddressCode()
+        sintE2Linha = threeAddressCode() 
+        herdE2Linha = threeAddressCode()
         if (self.currentToken == 'TK_OR'):
             op = self.currentLexeme()
             self.nextToken()
             if (self.E3(varE3)):
-                herdE2Linha.place = self.createTemp()
+                herdE2Linha.place = self.newTemp()
                 herdE2Linha.code = f'{herdE2.code + varE3.code + herdE2Linha.place} = {herdE2.place + op + varE3.place}\n'
                 Debug(f'Debug46: {herdE2Linha.place} || {herdE2Linha.code}')
                 if (self.lineE2(herdE2Linha, sintE2Linha)):
@@ -632,9 +603,9 @@ class Syntatic(object):
 
     #E3 -> E4 lineE3
     def E3(self, varE3):
-        varE4 = C3E()
-        sintE3 = C3E()
-        herdE3 = C3E()
+        varE4 = threeAddressCode()
+        sintE3 = threeAddressCode()
+        herdE3 = threeAddressCode()
         if (self.E4(varE4)):
             herdE3.place = varE4.place
             herdE3.code  = varE4.code
@@ -651,14 +622,14 @@ class Syntatic(object):
 
     #lineE3 -> && E4 lineE3 | vazio
     def lineE3(self, herdE3, sintE3):
-        varE4 = C3E()
-        sintE3Linha = C3E()
-        herdE3Linha = C3E()
+        varE4 = threeAddressCode()
+        sintE3Linha = threeAddressCode()
+        herdE3Linha = threeAddressCode()
         if (self.currentToken == 'TK_AND'):
             op = self.currentLexeme()
             self.nextToken()
             if (self.E4(varE4)):
-                herdE3Linha.place = self.createTemp()
+                herdE3Linha.place = self.newTemp()
                 herdE3Linha.code = f'{herdE3.code + varE4.code + herdE3Linha.place} = {herdE3.place + op + varE4.place}\n'
                 Debug(f'Debug41: {herdE3Linha.place} || {herdE3Linha.code}')
                 if (self.lineE3(herdE3Linha, sintE3Linha)):
@@ -674,9 +645,9 @@ class Syntatic(object):
         return True
     #E4 -> E5 lineE4'
     def E4(self, varE4):
-        varE5 = C3E()
-        sintE4 = C3E()
-        herdE4 = C3E()
+        varE5 = threeAddressCode()
+        sintE4 = threeAddressCode()
+        herdE4 = threeAddressCode()
         if (self.E5(varE5)):
             herdE4.place = varE5.place
             herdE4.code  = varE5.code
@@ -691,14 +662,14 @@ class Syntatic(object):
         else:
             return False
     def lineE4(self, herdE4, sintE4):
-        varE5 = C3E()
-        sintE4Linha = C3E()
-        herdE4Linha = C3E()
+        varE5 = threeAddressCode()
+        sintE4Linha = threeAddressCode()
+        herdE4Linha = threeAddressCode()
         if (self.currentToken == 'TK_LOGICOR'):
             op = self.currentLexeme()
             self.nextToken()
             if (self.E5(varE5)):
-                herdE4Linha.place = self.createTemp()
+                herdE4Linha.place = self.newTemp()
                 herdE4Linha.code = f'{herdE4.code + varE5.code + herdE4Linha.place} = {herdE4.place + op + varE5.place}\n'
                 Debug(f'Debug36: {herdE4Linha.place} || {herdE4Linha.code}')
                 if (self.lineE4(herdE4Linha, sintE4Linha)):
@@ -715,9 +686,9 @@ class Syntatic(object):
 
     #E5 -> E6 lineE5
     def E5(self, varE5):
-        varE6 = C3E()
-        sintE5 = C3E()
-        herdE5 = C3E()
+        varE6 = threeAddressCode()
+        sintE5 = threeAddressCode()
+        herdE5 = threeAddressCode()
         if (self.E6(varE6)):
             herdE5.place = varE6.place
             herdE5.code  = varE6.code
@@ -733,14 +704,14 @@ class Syntatic(object):
             return False
     #E5' -> | E6 E5' | e
     def lineE5(self, herdE5, sintE5):
-        varE6 = C3E()
-        sintE5Linha = C3E() 
-        herdE5Linha = C3E()
+        varE6 = threeAddressCode()
+        sintE5Linha = threeAddressCode() 
+        herdE5Linha = threeAddressCode()
         if (self.currentToken == 'TK_CIRCUMFLEX'):
             op = self.currentLexeme()
             self.nextToken()
             if (self.E6(varE6)):
-                herdE5Linha.place = self.createTemp()
+                herdE5Linha.place = self.newTemp()
                 herdE5Linha.code = f'{herdE5.code + varE6.code + herdE5Linha.place} = {herdE5.place + op + varE6.place}\n'
                 Debug(f'Debug31: {herdE5Linha.place} || {herdE5Linha.code}')
                 if (self.lineE5(herdE5Linha, sintE5Linha)):
@@ -756,9 +727,9 @@ class Syntatic(object):
         return True
 
     def E6(self, varE6):
-        varE7 = C3E()
-        sintE6 = C3E()
-        herdE6 = C3E()
+        varE7 = threeAddressCode()
+        sintE6 = threeAddressCode()
+        herdE6 = threeAddressCode()
         if (self.E7(varE7)):
             herdE6.place = varE7.place
             herdE6.code  = varE7.code
@@ -774,14 +745,14 @@ class Syntatic(object):
             return False
 
     def lineE6(self, herdE6, sintE6):
-        varE7 =  C3E()
-        sintE6Linha = C3E() 
-        herdE6Linha = C3E()
+        varE7 =  threeAddressCode()
+        sintE6Linha = threeAddressCode() 
+        herdE6Linha = threeAddressCode()
         if (self.currentToken == 'TK_LOGICAND'):
             op = self.currentLexeme()
             self.nextToken()
             if (self.E7(varE7)):
-                herdE6Linha.place = self.createTemp()
+                herdE6Linha.place = self.newTemp()
                 herdE6Linha.code = f'{herdE6.code + varE7.code + herdE6Linha.place} = {herdE6.place + op + varE7.place}\n'
                 Debug(f'Debug26: {herdE6Linha.place} || {herdE6Linha.code}')
                 if (self.lineE6(herdE6Linha, sintE6Linha)):
@@ -797,9 +768,9 @@ class Syntatic(object):
         return True
 
     def E7(self, varE7):
-        varE8 = C3E()
-        sintE7 = C3E()
-        herdE7 = C3E()
+        varE8 = threeAddressCode()
+        sintE7 = threeAddressCode()
+        herdE7 = threeAddressCode()
         if (self.E8(varE8)):
             herdE7.place = varE8.place
             herdE7.code  = varE8.code
@@ -815,14 +786,14 @@ class Syntatic(object):
             return False
 
     def lineE7(self, herdE7, sintE7):
-        varE8 = C3E()
-        sintE7Linha = C3E() 
-        herdE7Linha = C3E()
+        varE8 = threeAddressCode()
+        sintE7Linha = threeAddressCode() 
+        herdE7Linha = threeAddressCode()
         if (self.currentToken == 'TK_EQUALEQUAL' or self.currentToken == 'TK_NOTEQUAL'):
             op = self.currentLexeme()
             self.nextToken()
             if (self.E8(varE8)):
-                herdE7Linha.place = self.createTemp()
+                herdE7Linha.place = self.newTemp()
                 herdE7Linha.code = f'{herdE7.code + varE8.code + herdE7Linha.place} = {herdE7.place + op + varE8.place}\n'
                 Debug(f'Debug21: {herdE7Linha.place} || {herdE7Linha.code}')
                 if (self.lineE7(herdE7Linha, sintE7Linha)):
@@ -838,9 +809,9 @@ class Syntatic(object):
         return True
 
     def E8(self, varE8):
-        varE9 = C3E()
-        sintE8 = C3E()
-        herdE8 = C3E()
+        varE9 = threeAddressCode()
+        sintE8 = threeAddressCode()
+        herdE8 = threeAddressCode()
         if (self.E9(varE9)):
             herdE8.place = varE9.place
             herdE8.code  = varE9.code
@@ -856,15 +827,15 @@ class Syntatic(object):
             return False
 
     def lineE8(self, herdE8, sintE8):
-        varE9 = C3E()
-        sintE8Linha = C3E() 
-        herdE8Linha = C3E()
+        varE9 = threeAddressCode()
+        sintE8Linha = threeAddressCode() 
+        herdE8Linha = threeAddressCode()
         if (self.currentToken == 'TK_LESS' or self.currentToken == 'TK_GREATER' or
             self.currentToken == 'TK_LESSEQUAL' or self.currentToken == 'TK_GREATEREQUAL'):
             op = self.currentLexeme()
             self.nextToken()
             if (self.E9(varE9)):
-                herdE8Linha.place = self.createTemp()
+                herdE8Linha.place = self.newTemp()
                 herdE8Linha.code = f'{herdE8.code + varE9.code + herdE8Linha.place} = {herdE8.place + op + varE9.place}\n'
                 Debug(f'Debug16: {herdE8Linha.place} || {herdE8Linha.code}')
                 if (self.lineE8(herdE8Linha, sintE8Linha)):
@@ -880,9 +851,9 @@ class Syntatic(object):
         return True
 
     def E9(self, varE9):
-        varE10 = C3E()
-        sintE9 = C3E()
-        herdE9 = C3E()
+        varE10 = threeAddressCode()
+        sintE9 = threeAddressCode()
+        herdE9 = threeAddressCode()
         if (self.E10(varE10)):
             herdE9.place = varE10.place
             herdE9.code  = varE10.code
@@ -898,14 +869,14 @@ class Syntatic(object):
             return False
 
     def lineE9(self, herdE9, sintE9):
-        varE10 = C3E()
-        sintE9Linha = C3E() 
-        herdE9Linha = C3E()
+        varE10 = threeAddressCode()
+        sintE9Linha = threeAddressCode() 
+        herdE9Linha = threeAddressCode()
         if (self.currentToken == 'TK_PLUS' or self.currentToken == 'TK_MINUS'):
             op = self.currentLexeme()
             self.nextToken()
             if (self.E10(varE10)):
-                herdE9Linha.place = self.createTemp()
+                herdE9Linha.place = self.newTemp()
                 herdE9Linha.code = f'{herdE9.code + varE10.code + herdE9Linha.place} = {herdE9.place + op + varE10.place}\n'
                 Debug(f'Debug11: {herdE9Linha.place} || {herdE9Linha.code}')
                 if (self.lineE9(herdE9Linha, sintE9Linha)):
@@ -921,9 +892,9 @@ class Syntatic(object):
         return True
 
     def E10(self, varE10):
-        varE11 = C3E()
-        sintE10 = C3E()
-        herdE10 = C3E()
+        varE11 = threeAddressCode()
+        sintE10 = threeAddressCode()
+        herdE10 = threeAddressCode()
         if (self.E11(varE11)):
             herdE10.place = varE11.place
             herdE10.code  = varE11.code
@@ -939,14 +910,14 @@ class Syntatic(object):
             return False
 
     def lineE10(self, herdE10, sintE10):
-        varE11 = C3E()
-        sintE10Linha = C3E() 
-        herdE10Linha = C3E()
+        varE11 = threeAddressCode()
+        sintE10Linha = threeAddressCode() 
+        herdE10Linha = threeAddressCode()
         if (self.currentToken == 'TK_STAR' or self.currentToken == 'TK_SLASH' or self.currentToken == 'TK_PERCENT'):
             op = self.currentLexeme()
             self.nextToken()
             if (self.E11(varE11)):
-                herdE10Linha.place = self.createTemp()
+                herdE10Linha.place = self.newTemp()
                 herdE10Linha.code = f'{herdE10.code + varE11.code + herdE10Linha.place} = {herdE10.place + op + varE11.place}\n'
                 Debug(f'Debug6: {herdE10Linha.place} || {herdE10Linha.code}')
                 if (self.lineE10(herdE10Linha, sintE10Linha)):
@@ -964,14 +935,14 @@ class Syntatic(object):
     # E11 -> cte | id RE | (E)
     def E11(self,varE11):
         if (self.currentToken == "TK_CONST_INT" or self.currentToken == "TK_CONST_REAL"):
-            tempAtr = self.createTemp()
+            tempAtr = self.newTemp()
             varE11.code += f'{tempAtr} = {self.currentLexeme()}\n'
             varE11.place = tempAtr
             Debug(f'Debug3: {varE11.place} || {varE11.code}')
             self.nextToken()
             return True
         elif (self.currentToken == "TK_ID"):
-            if (not self.isDeclaredVariable()):
+            if (not self.alreadyExists()):
                 print(f'Erro: variável {self.currentLexeme()} não declarada.')
                 return False
 
@@ -985,7 +956,7 @@ class Syntatic(object):
                 return False
         elif (self.currentToken == "TK_LEFTPAR"):
             self.nextToken()
-            exp = C3E()
+            exp = threeAddressCode()
             if (self.E(exp)):
                 varE11.place = exp.place
                 varE11.code = exp.code
@@ -1009,7 +980,7 @@ class Syntatic(object):
                     self.nextToken()
                     return True
                 else:
-                    print(f'Erro: esperava token ")" na linha {self.currentLine()} coluna {self.currentColumn()}.')
+                    print(f'Erro: esperava token ")" na linha {self.currentRow()} coluna {self.currentColumn()}.')
                     return False
             else:
                 return False

@@ -1,6 +1,0 @@
-lexema: int, row: 0, col: 0, token: TK_INT
-lexema: a, row: 0, col: 4, token: TK_ID
-lexema: =, row: 0, col: 6, token: TK_EQUAL
-lexema: 2, row: 0, col: 8, token: TK_CONST_INT
-lexema: ;, row: 0, col: 9, token: TK_SEMICOLON
-lexema: $, row: 0, col: 9, token: TK_EOF

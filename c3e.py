@@ -67,7 +67,7 @@ def doAnalisis(file,outputfile):
 
     if outputfile != '':
         if result:
-            print(f"\nGravando C3E em {outputfile} ...")
+            print(f"\nGravando o C3E em {outputfile} ...")
             with open(outputfile,'w') as o:
                 o.write(syntatic.resultCode.code)
                 o.close
