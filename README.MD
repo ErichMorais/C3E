@@ -8,6 +8,7 @@ No modo em que é feita a leitura do arquivo (não-iterativo) é necessario inse
 $ python3 c3e.py -i archives/entrada.txt
 ### Linux
 Será necessario instalar a lib Keyboard e executar o terminal como adminstrador (sudo)
+
 $ pip3 install keyboard
 $ sudo python3 c3e.py -i archives/entrada.txt
 
